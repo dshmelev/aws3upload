@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require 'aws-sdk'
+
+access_id  = ENV['AWS_ACCESS_KEY_ID']
+secret_key = ENV['AWS_SECRET_ACCESS_KEY']
+bucket     = ENV['AWS_S3_BUCKET']
+region     = ENV['AWS_S3_REGION']
+
+source     = File.absolute_path(ARGV[0])
+target     = ARGV[1]
+
+puts "Copy #{source} to #{bucket}:::#{target}"
+
+Aws.config.update({
+  credentials: Aws::Credentials.new(access_id, secret_key)
+})
+s3 = Aws::S3::Resource.new(region: region)
+
+name = File.basename(source)
+obj = s3.bucket(bucket).object(target)
+obj.upload_file(source)
