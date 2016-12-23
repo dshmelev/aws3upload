@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
 
-access_id  = ENV['AWS_ACCESS_KEY_ID']
-secret_key = ENV['AWS_SECRET_ACCESS_KEY']
 bucket     = ENV['AWS_S3_BUCKET']
-region     = ENV['AWS_S3_REGION']
-
 source     = File.absolute_path(ARGV[0])
 target     = ARGV[1]
 
