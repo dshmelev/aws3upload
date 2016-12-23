@@ -7,11 +7,7 @@ target     = ARGV[1]
 
 puts "Copy #{source} to #{bucket}:::#{target}"
 
-Aws.config.update({
-  credentials: Aws::Credentials.new
-})
 s3 = Aws::S3::Resource.new
-
 name = File.basename(source)
 obj = s3.bucket(bucket).object(target)
 obj.upload_file(source)
