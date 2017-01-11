@@ -1,13 +1,32 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
+require 'optparse'
 
-bucket     = ENV['AWS_S3_BUCKET']
-source     = File.absolute_path(ARGV[0])
-target     = ARGV[1]
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: aws3upload [OPTIONS] SOURCE DEST"
+  opts.on('-t', '--tags KEY=VALUE,...', Array, 'Add s3 tags for object') do |tags|
+    options[:tags] = tags.map { |i|
+      i.split('=')
+    }.to_h.map { |k,v| {key: k, value: v} }
+  end
+end.parse!
+
+bucket = ENV['AWS_S3_BUCKET']
+source = ARGV.shift
+target = ARGV.shift
+
+raise "Missing AWS_S3_BUCKET env variable" unless bucket
+raise "Missing DEST argument" unless target
+raise "Missing SOURCE argument" unless source
 
 puts "Copy #{source} to #{bucket}:::#{target}"
 
-s3 = Aws::S3::Resource.new
-name = File.basename(source)
-obj = s3.bucket(bucket).object(target)
-obj.upload_file(source)
+s3 = Aws::S3::Client.new
+File.open(source,'rb') do |file|
+  s3.put_object(bucket: bucket, key: target, body: file)
+end
+
+if options[:tags]
+  s3.put_object_tagging({bucket: bucket, key: target, tagging:{ tag_set: options[:tags] } })
+end
