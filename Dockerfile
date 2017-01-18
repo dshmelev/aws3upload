@@ -1,4 +1,4 @@
-FROM ruby:2.4.0
+FROM ruby:2.4.0-alpine
 MAINTAINER avikez@gmail.com
 
 COPY ./ /app
