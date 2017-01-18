@@ -34,5 +34,6 @@ File.open(source,'rb') do |file|
 end
 
 if options[:tags]
+  puts "Tagging object with #{options[:tags]}"
   s3.put_object_tagging({bucket: bucket, key: target, tagging:{ tag_set: options[:tags] } })
 end

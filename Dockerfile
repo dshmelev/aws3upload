@@ -5,4 +5,4 @@ COPY ./ /app
 WORKDIR /app
 RUN bundle install
 
-ENTRYPOINT bin/aws3upload
+ENTRYPOINT ["bin/aws3upload"]
