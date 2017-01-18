@@ -1,8 +1,7 @@
 FROM ruby:2.4.0-alpine
 MAINTAINER avikez@gmail.com
 
-COPY ./ /app
 WORKDIR /app
-RUN bundle install
+RUN gem install aws3upload
 
-ENTRYPOINT ["bin/aws3upload"]
+ENTRYPOINT ["aws3upload"]
