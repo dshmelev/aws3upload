@@ -4,7 +4,10 @@ require 'optparse'
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: aws3upload [OPTIONS] SOURCE DEST"
+  opts.banner = <<~HEREDOC
+    Usage: aws3upload [OPTIONS] SOURCE DEST
+    Require environments: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET
+  HEREDOC
   opts.on('-t', '--tags KEY=VALUE,...', Array, 'Add s3 tags for object') do |tags|
     options[:tags] = tags.map { |i|
       i.split('=')
@@ -16,7 +19,9 @@ bucket = ENV['AWS_S3_BUCKET']
 source = ARGV.shift
 target = ARGV.shift
 
-raise "Missing AWS_S3_BUCKET env variable" unless bucket
+['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_S3_BUCKET'].each do |env|
+  raise "Missing #{env} environment variable" unless ENV[env]
+end
 raise "Missing DEST argument" unless target
 raise "Missing SOURCE argument" unless source
 

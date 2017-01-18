@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'aws3upload'
-  s.version     = '1.0.3'
+  s.version     = '1.0.4'
   s.date        = '2016-12-22'
   s.summary     = "AWS S3 Upload"
   s.description = "Simple aws s3 upload app"
