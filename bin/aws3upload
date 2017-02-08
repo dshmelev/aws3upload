@@ -7,18 +7,22 @@ OptionParser.new do |opts|
   opts.banner = <<~HEREDOC
     Usage: aws3upload [OPTIONS] SOURCE DEST
     Require environments: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET
-    Optional environments: S3_SRC, S3_DEST
+    Optional environments: S3_SRC, S3_DEST, S3_STORAGE_CLASS
   HEREDOC
   opts.on('-t', '--tags KEY=VALUE,...', Array, 'Add s3 tags for object') do |tags|
     options[:tags] = tags.map { |i|
       i.split('=')
     }.to_h.map { |k,v| {key: k, value: v} }
   end
+  opts.on('-s', '--storage STANDARD_IA', String, 'Change s3 storage class (STANDARD|REDUCED_REDUNDANCY|STANDARD_IA)') do |storage|
+    options[:storage] = storage
+  end
 end.parse!
 
 bucket = ENV['AWS_S3_BUCKET']
 source = ARGV.shift || ENV['S3_SRC']
 target = ARGV.shift || ENV['S3_DEST']
+storage = options[:storage] || 'STANDARD_IA'
 
 ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_S3_BUCKET'].each do |env|
   raise "Missing #{env} environment variable" unless ENV[env]
@@ -29,8 +33,12 @@ raise "Missing SOURCE argument" unless source
 puts "Copy #{source} to #{bucket}:::#{target}"
 
 s3 = Aws::S3::Client.new
-File.open(source,'rb') do |file|
-  s3.put_object(bucket: bucket, key: target, body: file)
+begin
+  File.open(source,'rb') do |file|
+    s3.put_object(bucket: bucket, key: target, body: file, storage_class: storage)
+  end
+rescue Aws::S3::Errors::InvalidStorageClass
+  abort "Invalid s3 storage class #{storage}"
 end
 
 if options[:tags]
